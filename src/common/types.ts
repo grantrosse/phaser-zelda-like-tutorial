@@ -31,3 +31,5 @@ export type LevelData = {
 };
 
 export type DungeonItem = keyof typeof DUNGEON_ITEM;
+
+export type TransitionConfig = { open: boolean; x: number; y: number };

@@ -10,7 +10,7 @@ import { CHEST_REWARD_TO_DIALOG_MAP, DIRECTION } from '../common/common';
 import * as CONFIG from '../common/config';
 import { Pot } from '../game-objects/objects/pot';
 import { Chest } from '../game-objects/objects/chest';
-import { GameObject, LevelData } from '../common/types';
+import { GameObject, LevelData, TransitionConfig } from '../common/types';
 import { CUSTOM_EVENTS, EVENT_BUS } from '../common/event-bus';
 import {
   exhaustiveGuard,
@@ -106,6 +106,7 @@ export class GameScene extends Phaser.Scene {
     this.#registerCustomEvents();
 
     this.scene.launch(SCENE_KEYS.UI_SCENE);
+    this.#startSceneTransition();
   }
 
   #registerColliders(): void {
@@ -547,6 +548,9 @@ export class GameScene extends Phaser.Scene {
     this.#controls.isMovementLocked = true;
 
     const door = this.#objectsByRoomId[this.#currentRoomId].doorMap[doorTrigger.name] as Door;
+    // disable body on game object so we stop triggering the collision
+    door.disableObject();
+
     const modifiedLevelName = door.targetLevel.toUpperCase();
     if (isLevelName(modifiedLevelName)) {
       const sceneData: LevelData = {
@@ -554,13 +558,12 @@ export class GameScene extends Phaser.Scene {
         roomId: door.targetRoomId,
         doorId: door.targetDoorId,
       };
-      this.scene.start(SCENE_KEYS.GAME_SCENE, sceneData);
+      // this.scene.start(SCENE_KEYS.GAME_SCENE, sceneData);
+      this.#startSceneTransition(sceneData);
       return;
     }
     const targetDoor = this.#objectsByRoomId[door.targetRoomId].doorMap[door.targetDoorId];
 
-    // disable body on game object so we stop triggering the collision
-    door.disableObject();
     // update 2nd room to have items visible
     this.#showObjectsInRoomById(targetDoor.roomId);
     // disable body on target door so we don't trigger transition back to original room
@@ -773,5 +776,38 @@ export class GameScene extends Phaser.Scene {
   #handleBossDefeated(): void {
     DataManager.instance.defeatedCurrentAreaBoss();
     this.#handleAllEnemiesDefeated();
+  }
+
+  /**
+   * Launches the TransitionScene, which is a top level Phaser Scene for creating a level transition
+   * mask that focuses on the player. The transition is a simple ellipse that will shrink or grow depending
+   * on if we just started this scene, or are stopping this scene.
+   *
+   * Example: When the game starts, the scene will be black and a small ellipse will shine on player and grow
+   * until the whole scene is visible. When the player exits a door, the ellipse will shrink down until the
+   * screen is completely black.
+   *
+   * @param {LevelData} [sceneData] The level data to pass if restarting this scene.
+   */
+  #startSceneTransition(sceneData?: LevelData): void {
+    // lock input until scene transition is completed
+    this.#controls.isMovementLocked = true;
+
+    const transitionData: TransitionConfig = {
+      open: sceneData === undefined ? true : false,
+      x: this.#player.x - this.cameras.main.scrollX,
+      y: this.#player.y - this.cameras.main.scrollY,
+    };
+    this.scene.launch(SCENE_KEYS.TRANSITION_SCENE, transitionData);
+
+    this.scene.get(SCENE_KEYS.TRANSITION_SCENE).events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (sceneData === undefined) {
+        // unlock input so we can continue the game
+        this.#controls.isMovementLocked = false;
+        return;
+      }
+      // transition to the next scene
+      this.scene.start(SCENE_KEYS.GAME_SCENE, sceneData);
+    });
   }
 }
