@@ -233,6 +233,10 @@ export class GameScene extends Phaser.Scene {
           this.#player.weaponComponent.body,
           (enemy) => {
             (enemy as CharacterGameObject).hit(this.#player.direction, this.#player.weaponComponent.weaponDamage);
+            // disable projectile weapons
+            if (this.#player.weaponComponent.weapon !== undefined && this.#player.weaponComponent.weapon.isProjectile) {
+              this.#player.weaponComponent.weapon.onCollisionCallback();
+            }
           },
         );
 

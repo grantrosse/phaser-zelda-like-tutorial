@@ -41,19 +41,19 @@ export class Bow extends BaseWeapon {
   }
 
   public attackUp(): void {
-    this.attack(DIRECTION.UP);
+    this.attack(DIRECTION.UP, false);
   }
 
   public attackDown(): void {
-    this.attack(DIRECTION.DOWN);
+    this.attack(DIRECTION.DOWN, false);
   }
 
   public attackRight(): void {
-    this.attack(DIRECTION.RIGHT);
+    this.attack(DIRECTION.RIGHT, false);
   }
 
   public attackLeft(): void {
-    this.attack(DIRECTION.LEFT);
+    this.attack(DIRECTION.LEFT, false);
   }
 
   public update(): void {
@@ -79,6 +79,7 @@ export class Bow extends BaseWeapon {
     }
     this.#isArrowActive = true;
     this._attacking = false;
+    this._weaponComponent.body.enable = true;
     this.#weaponSprite.scene.time.delayedCall(450, () => {
       this.#disableArrow();
     });
@@ -93,6 +94,7 @@ export class Bow extends BaseWeapon {
     this._weaponComponent.body.setVelocityX(0);
     this._weaponComponent.body.setVelocityY(0);
     this.#isArrowActive = false;
+    this._weaponComponent.body.enable = false;
   }
 
   #fireArrowUp(): void {

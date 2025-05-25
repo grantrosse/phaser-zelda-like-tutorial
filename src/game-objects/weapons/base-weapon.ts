@@ -61,12 +61,12 @@ export abstract class BaseWeapon implements Weapon {
     return this._isProjectile;
   }
 
-  protected attack(direction: Direction): void {
+  protected attack(direction: Direction, enablePhysicsBody = true): void {
     const attackAnimationKey = this._attackAnimationConfig[direction];
     this._attacking = true;
     this._currentAttackDirection = direction;
     this._sprite.play({ key: attackAnimationKey, repeat: 0 }, true);
-    this._weaponComponent.body.enable = true;
+    this._weaponComponent.body.enable = enablePhysicsBody;
     this._sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + attackAnimationKey, () => {
       this.attackAnimationCompleteHandler();
     });
