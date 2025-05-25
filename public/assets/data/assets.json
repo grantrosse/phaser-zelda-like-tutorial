@@ -56,6 +56,11 @@
         "key": "DAGGER",
         "url": "dagger.png",
         "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
+      },
+      {
+        "type": "image",
+        "key": "ARROW_1",
+        "url": "arrow1.png"
       }
     ]
   },
