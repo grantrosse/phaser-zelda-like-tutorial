@@ -14,6 +14,7 @@ export class PreloadScene extends Phaser.Scene {
   public preload(): void {
     // load asset pack that has assets for the rest of the game
     this.load.pack(ASSET_PACK_KEYS.MAIN, 'assets/data/assets.json');
+    this.load.image(ASSET_KEYS.ARROW_1, 'assets/images/player/arrow1.png');
   }
 
   public create(): void {

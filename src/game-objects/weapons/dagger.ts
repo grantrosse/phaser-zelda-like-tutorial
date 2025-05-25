@@ -14,7 +14,7 @@ export class Dagger extends BaseWeapon {
     baseDamage: number,
     weaponSpeed: number,
   ) {
-    super(sprite, weaponComponent, animationConfig, baseDamage);
+    super(sprite, weaponComponent, animationConfig, baseDamage, false);
 
     this.#weaponSprite = sprite.scene.add
       .sprite(0, 0, ASSET_KEYS.DAGGER, 0)

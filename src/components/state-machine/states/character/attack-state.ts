@@ -21,6 +21,10 @@ export class AttackState extends BaseCharacterState {
     }
 
     const weapon = weaponComponent.weapon;
+    if (!weapon.canAttack) {
+      this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
+      return;
+    }
     switch (this._gameObject.direction) {
       case DIRECTION.UP:
         return weapon.attackUp();

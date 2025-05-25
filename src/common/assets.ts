@@ -24,6 +24,7 @@ export const ASSET_KEYS = {
   WORLD_LEVEL: 'WORLD_LEVEL',
   HUD_NUMBERS: 'HUD_NUMBERS',
   FONT_PRESS_START_2P: 'FONT_PRESS_START_2P',
+  ARROW_1: 'ARROW_1',
 } as const;
 
 export const PLAYER_ANIMATION_KEYS = {
@@ -51,6 +52,9 @@ export const PLAYER_ANIMATION_KEYS = {
   SWORD_1_ATTACK_DOWN: 'player_atk_1_down',
   SWORD_1_ATTACK_UP: 'player_atk_1_up',
   SWORD_1_ATTACK_SIDE: 'player_atk_1_side',
+  BOW_1_ATTACK_DOWN: 'player_archer_1_down',
+  BOW_1_ATTACK_UP: 'player_archer_1_up',
+  BOW_1_ATTACK_SIDE: 'player_archer_1_side',
 } as const;
 
 export const SPIDER_ANIMATION_KEYS = {

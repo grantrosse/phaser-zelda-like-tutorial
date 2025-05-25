@@ -6,6 +6,7 @@ import { CHARACTER_STATES } from '../../components/state-machine/states/characte
 import { MoveState } from '../../components/state-machine/states/character/move-state';
 import {
   PLAYER_ATTACK_DAMAGE,
+  PLAYER_BOW_ATTACK_SPEED,
   PLAYER_HURT_PUSH_BACK_SPEED,
   PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
   PLAYER_SPEED,
@@ -26,6 +27,7 @@ import { ThrowState } from '../../components/state-machine/states/character/thro
 import { AttackState } from '../../components/state-machine/states/character/attack-state';
 import { WeaponComponent } from '../../components/game-object/weapon-component';
 import { Sword } from '../weapons/sword';
+import { Bow } from '../weapons/bow';
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -119,7 +121,21 @@ export class Player extends CharacterGameObject {
         RIGHT: PLAYER_ANIMATION_KEYS.SWORD_1_ATTACK_SIDE,
       },
       PLAYER_ATTACK_DAMAGE,
+      false,
     );
+
+    // this.#weaponComponent.weapon = new Bow(
+    //   this,
+    //   this.#weaponComponent,
+    //   {
+    //     DOWN: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_DOWN,
+    //     UP: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_UP,
+    //     LEFT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
+    //     RIGHT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
+    //   },
+    //   PLAYER_ATTACK_DAMAGE,
+    //   PLAYER_BOW_ATTACK_SPEED,
+    // );
 
     // enable auto update functionality
     config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);

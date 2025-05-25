@@ -1,9 +1,12 @@
+import { DIRECTION } from '../../common/common';
 import { Direction } from '../../common/types';
 import { WeaponComponent } from '../../components/game-object/weapon-component';
 
 export interface Weapon {
   baseDamage: number;
   isAttacking: boolean;
+  canAttack: boolean;
+  isProjectile: boolean;
   attackUp(): void;
   attackDown(): void;
   attackRight(): void;
@@ -22,18 +25,23 @@ export abstract class BaseWeapon implements Weapon {
   protected _sprite: Phaser.GameObjects.Sprite;
   protected _attackAnimationConfig: WeaponAttackAnimationConfig;
   protected _baseDamage: number;
+  protected _currentAttackDirection: Direction;
+  protected _isProjectile: boolean;
 
   constructor(
     sprite: Phaser.GameObjects.Sprite,
     weaponComponent: WeaponComponent,
     animationConfig: WeaponAttackAnimationConfig,
     baseDamage: number,
+    isProjectile: boolean,
   ) {
     this._sprite = sprite;
     this._weaponComponent = weaponComponent;
     this._attackAnimationConfig = animationConfig;
     this._baseDamage = baseDamage;
     this._attacking = false;
+    this._currentAttackDirection = DIRECTION.DOWN;
+    this._isProjectile = isProjectile;
   }
 
   get isAttacking(): boolean {
@@ -44,9 +52,18 @@ export abstract class BaseWeapon implements Weapon {
     return this._baseDamage;
   }
 
+  get canAttack(): boolean {
+    return !this._attacking;
+  }
+
+  get isProjectile(): boolean {
+    return this._isProjectile;
+  }
+
   protected attack(direction: Direction): void {
     const attackAnimationKey = this._attackAnimationConfig[direction];
     this._attacking = true;
+    this._currentAttackDirection = direction;
     this._sprite.play({ key: attackAnimationKey, repeat: 0 }, true);
     this._weaponComponent.body.enable = true;
     this._sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + attackAnimationKey, () => {

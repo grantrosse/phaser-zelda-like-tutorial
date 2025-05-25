@@ -68,6 +68,7 @@ export class GameScene extends Phaser.Scene {
   #lockedDoorGroup!: Phaser.GameObjects.Group;
   #switchGroup!: Phaser.GameObjects.Group;
   #rewardItem!: Phaser.GameObjects.Image;
+  #playerWeaponCollider!: Phaser.Physics.Arcade.Collider;
 
   constructor() {
     super({
@@ -125,6 +126,24 @@ export class GameScene extends Phaser.Scene {
       // add game object to players collision list
       this.#player.collidedWithGameObject(gameObject as GameObject);
     });
+    // register collisions between player projectile weapon and blocking game objects (doors, pots, chests, etc.)
+    // TODO: once we can switch weapons, see if we can enable/disable collider based on the weapon type
+    this.#playerWeaponCollider = this.physics.add.collider(
+      this.#player.weaponComponent.body,
+      this.#blockingGroup,
+      () => {
+        if (this.#player.weaponComponent.weapon === undefined) {
+          return;
+        }
+        this.#player.weaponComponent.weapon.onCollisionCallback();
+      },
+      () => {
+        if (this.#player.weaponComponent.weapon === undefined) {
+          return false;
+        }
+        return this.#player.weaponComponent.weapon.isProjectile;
+      },
+    );
 
     // collision between player and switches that can be stepped on
     this.physics.add.overlap(this.#player, this.#switchGroup, (playerObj, switchObj) => {
@@ -790,6 +809,8 @@ export class GameScene extends Phaser.Scene {
    * @param {LevelData} [sceneData] The level data to pass if restarting this scene.
    */
   #startSceneTransition(sceneData?: LevelData): void {
+    return;
+
     // lock input until scene transition is completed
     this.#controls.isMovementLocked = true;
 
