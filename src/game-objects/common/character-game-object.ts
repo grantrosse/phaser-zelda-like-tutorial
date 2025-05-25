@@ -146,6 +146,10 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite i
       return;
     }
 
+    const weaponComponent = WeaponComponent.getComponent<WeaponComponent>(this);
+    if (weaponComponent !== undefined && weaponComponent.weapon !== undefined && weaponComponent.weapon.isAttacking) {
+      weaponComponent.weapon.resetWeapon();
+    }
     this._stateMachine.setState(CHARACTER_STATES.HURT_STATE, direction);
   }
 

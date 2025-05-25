@@ -13,6 +13,7 @@ export interface Weapon {
   attackLeft(): void;
   update(): void;
   onCollisionCallback(): void;
+  resetWeapon(): void;
 }
 
 export type WeaponAttackAnimationConfig = {
@@ -72,6 +73,16 @@ export abstract class BaseWeapon implements Weapon {
   }
 
   protected attackAnimationCompleteHandler(): void {
+    this._attacking = false;
+    this._weaponComponent.body.enable = false;
+  }
+
+  public resetWeapon(): void {
+    if (!this.isAttacking) {
+      return;
+    }
+    const attackAnimationKey = this._attackAnimationConfig[this._currentAttackDirection];
+    this._sprite.off(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + attackAnimationKey);
     this._attacking = false;
     this._weaponComponent.body.enable = false;
   }
