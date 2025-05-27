@@ -68,7 +68,9 @@ export class GameScene extends Phaser.Scene {
   #lockedDoorGroup!: Phaser.GameObjects.Group;
   #switchGroup!: Phaser.GameObjects.Group;
   #rewardItem!: Phaser.GameObjects.Image;
-  #playerWeaponCollider!: Phaser.Physics.Arcade.Collider;
+  // TODO: fix lint issue
+  // eslint-disable-next-line no-unused-private-class-members
+  #playerItemCollider!: Phaser.Physics.Arcade.Collider;
 
   constructor() {
     super({
@@ -126,22 +128,23 @@ export class GameScene extends Phaser.Scene {
       // add game object to players collision list
       this.#player.collidedWithGameObject(gameObject as GameObject);
     });
+
     // register collisions between player projectile weapon and blocking game objects (doors, pots, chests, etc.)
     // TODO: once we can switch weapons, see if we can enable/disable collider based on the weapon type
-    this.#playerWeaponCollider = this.physics.add.collider(
-      this.#player.weaponComponent.body,
+    this.#playerItemCollider = this.physics.add.collider(
+      this.#player.itemComponent.body,
       this.#blockingGroup,
       () => {
-        if (this.#player.weaponComponent.weapon === undefined) {
+        if (this.#player.itemComponent.weapon === undefined) {
           return;
         }
-        this.#player.weaponComponent.weapon.onCollisionCallback();
+        this.#player.itemComponent.weapon.onCollisionCallback();
       },
       () => {
-        if (this.#player.weaponComponent.weapon === undefined) {
+        if (this.#player.itemComponent.weapon === undefined) {
           return false;
         }
-        return this.#player.weaponComponent.weapon.isProjectile;
+        return this.#player.itemComponent.weapon.isProjectile;
       },
     );
 
@@ -239,6 +242,14 @@ export class GameScene extends Phaser.Scene {
             }
           },
         );
+        // register collisions between player item component and enemies
+        this.physics.add.overlap(this.#objectsByRoomId[roomId].enemyGroup, this.#player.itemComponent.body, (enemy) => {
+          (enemy as CharacterGameObject).hit(this.#player.direction, this.#player.itemComponent.weaponDamage);
+          // disable projectile weapons
+          if (this.#player.itemComponent.weapon !== undefined && this.#player.itemComponent.weapon.isProjectile) {
+            this.#player.itemComponent.weapon.onCollisionCallback();
+          }
+        });
 
         // register collisions between enemy weapon and player
         const enemyWeapons = this.#objectsByRoomId[roomId].enemyGroup.getChildren().flatMap((enemy) => {

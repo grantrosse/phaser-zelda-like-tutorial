@@ -21,6 +21,11 @@ export class MoveState extends BaseMoveState {
       return;
     }
 
+    if (controls.isItemKeyJustDown) {
+      this._stateMachine.setState(CHARACTER_STATES.USE_ITEM_STATE);
+      return;
+    }
+
     // if no input is provided transition back to idle state
     if (this.isNoInputMovement(controls)) {
       this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);

@@ -41,6 +41,11 @@ export class IdleState extends BaseCharacterState {
       return;
     }
 
+    if (controls.isItemKeyJustDown) {
+      this._stateMachine.setState(CHARACTER_STATES.USE_ITEM_STATE);
+      return;
+    }
+
     // if no other input is provided, do nothing
     if (!controls.isDownDown && !controls.isUpDown && !controls.isLeftDown && !controls.isRightDown) {
       return;

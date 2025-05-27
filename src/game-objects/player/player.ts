@@ -28,6 +28,8 @@ import { AttackState } from '../../components/state-machine/states/character/att
 import { WeaponComponent } from '../../components/game-object/weapon-component';
 import { Sword } from '../weapons/sword';
 import { Bow } from '../weapons/bow';
+import { ItemComponent } from '../../components/game-object/item-component';
+import { UseItemState } from '../../components/state-machine/states/character/use-item-state';
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -40,6 +42,7 @@ export type PlayerConfig = {
 export class Player extends CharacterGameObject {
   #collidingObjectsComponent: CollidingObjectsComponent;
   #weaponComponent: WeaponComponent;
+  #itemComponent: ItemComponent;
 
   constructor(config: PlayerConfig) {
     // create animation config for component
@@ -105,6 +108,7 @@ export class Player extends CharacterGameObject {
     this._stateMachine.addState(new MoveHoldingState(this));
     this._stateMachine.addState(new ThrowState(this));
     this._stateMachine.addState(new AttackState(this));
+    this._stateMachine.addState(new UseItemState(this));
     this._stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
     // add components
@@ -124,18 +128,19 @@ export class Player extends CharacterGameObject {
       false,
     );
 
-    // this.#weaponComponent.weapon = new Bow(
-    //   this,
-    //   this.#weaponComponent,
-    //   {
-    //     DOWN: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_DOWN,
-    //     UP: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_UP,
-    //     LEFT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
-    //     RIGHT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
-    //   },
-    //   PLAYER_ATTACK_DAMAGE,
-    //   PLAYER_BOW_ATTACK_SPEED,
-    // );
+    this.#itemComponent = new ItemComponent(this);
+    this.#itemComponent.weapon = new Bow(
+      this,
+      this.#itemComponent,
+      {
+        DOWN: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_DOWN,
+        UP: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_UP,
+        LEFT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
+        RIGHT: PLAYER_ANIMATION_KEYS.BOW_1_ATTACK_SIDE,
+      },
+      PLAYER_ATTACK_DAMAGE,
+      PLAYER_BOW_ATTACK_SPEED,
+    );
 
     // enable auto update functionality
     config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
@@ -159,6 +164,10 @@ export class Player extends CharacterGameObject {
     return this.#weaponComponent;
   }
 
+  get itemComponent(): ItemComponent {
+    return this.#itemComponent;
+  }
+
   public collidedWithGameObject(gameObject: GameObject): void {
     this.#collidingObjectsComponent.add(gameObject);
   }
@@ -167,5 +176,6 @@ export class Player extends CharacterGameObject {
     super.update();
     this.#collidingObjectsComponent.reset();
     this.#weaponComponent.update();
+    this.#itemComponent.update();
   }
 }
