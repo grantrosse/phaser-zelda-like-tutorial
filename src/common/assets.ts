@@ -24,7 +24,8 @@ export const ASSET_KEYS = {
   WORLD_LEVEL: 'WORLD_LEVEL',
   HUD_NUMBERS: 'HUD_NUMBERS',
   FONT_PRESS_START_2P: 'FONT_PRESS_START_2P',
-  ARROW_1: 'ARROW_1',
+  WEAPONS: 'WEAPONS',
+  WEAPON_ANIMATIONS: 'WEAPON_ANIMATIONS',
 } as const;
 
 export const PLAYER_ANIMATION_KEYS = {
@@ -158,3 +159,10 @@ export const HEART_TEXTURE_FRAME = {
   EMPTY: '14',
   HALF: '12',
 } as const;
+
+export const WEAPON_TEXTURE_FRAME = {
+  ARROW_1: 'arrow1.png',
+  BOMB: 'bomb1.png',
+  DISC_1: 'disc1.png',
+  EXPLOSION: 'explosion1.png',
+};

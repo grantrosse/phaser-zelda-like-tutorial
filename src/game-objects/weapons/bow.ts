@@ -1,7 +1,7 @@
 import { BaseWeapon, WeaponAttackAnimationConfig } from './base-weapon';
 import { DIRECTION } from '../../common/common';
 import { WeaponComponent } from '../../components/game-object/weapon-component';
-import { ASSET_KEYS } from '../../common/assets';
+import { ASSET_KEYS, WEAPON_TEXTURE_FRAME } from '../../common/assets';
 import { exhaustiveGuard } from '../../common/utils';
 
 /**
@@ -30,7 +30,10 @@ export class Bow extends BaseWeapon {
   ) {
     super(sprite, weaponComponent, animationConfig, baseDamage, true);
 
-    this.#weaponSprite = sprite.scene.add.sprite(0, 0, ASSET_KEYS.ARROW_1, 0).setVisible(false).setOrigin(0, 1);
+    this.#weaponSprite = sprite.scene.add
+      .sprite(0, 0, ASSET_KEYS.WEAPONS, WEAPON_TEXTURE_FRAME.ARROW_1)
+      .setVisible(false)
+      .setOrigin(0, 1);
     this.#weaponSpeed = weaponSpeed;
     this._weaponComponent.body.setSize(this.#weaponSprite.width, this.#weaponSprite.height);
     this.#isArrowActive = false;

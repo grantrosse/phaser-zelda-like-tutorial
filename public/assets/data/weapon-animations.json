@@ -1,0 +1,145 @@
+{
+    "anims": [
+        {
+            "key": "explosion",
+            "type": "frame",
+            "frames": [
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion1.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion2.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion3.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion4.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion5.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion6.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion7.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "explosion8.png",
+                    "duration": 0,
+                    "keyframe": false
+                }
+            ],
+            "frameRate": 12,
+            "skipMissedFrames": true,
+            "showOnStart": true,
+            "randomFrame": false,
+            "hideOnComplete": true
+        },
+        {
+            "key": "bomb-idle",
+            "type": "frame",
+            "frames": [
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb1.png",
+                    "duration": 0,
+                    "keyframe": false
+                }
+            ],
+            "frameRate": 24,
+            "skipMissedFrames": true,
+            "repeat": -1,
+            "randomFrame": false
+        },
+        {
+            "key": "bomb-flash",
+            "type": "frame",
+            "frames": [
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb1.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb2.png",
+                    "duration": 0,
+                    "keyframe": false
+                }
+            ],
+            "frameRate": 6,
+            "skipMissedFrames": true,
+            "repeat": -1,
+            "randomFrame": false
+        },
+        {
+            "key": "bomb-explode",
+            "type": "frame",
+            "frames": [
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb1.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb2.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb3.png",
+                    "duration": 0,
+                    "keyframe": false
+                },
+                {
+                    "key": "WEAPONS",
+                    "frame": "bomb4.png",
+                    "duration": 0,
+                    "keyframe": false
+                }
+            ],
+            "frameRate": 12,
+            "skipMissedFrames": true,
+            "randomFrame": false,
+            "hideOnComplete": true
+        }
+    ],
+    "globalTimeScale": 1,
+    "meta": {
+        "app": "Phaser Editor 2D v3",
+        "contentType": "Phaser v3 Animations"
+    },
+    "settings": {
+        "sourceLang": "JAVA_SCRIPT",
+        "esModule": false,
+        "generateCode": false
+    }
+}

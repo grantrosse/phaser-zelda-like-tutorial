@@ -58,9 +58,10 @@
         "frameConfig": { "frameWidth": 16, "frameHeight": 16 }
       },
       {
-        "type": "image",
-        "key": "ARROW_1",
-        "url": "arrow1.png"
+        "atlasURL": "weapons.json",
+        "textureURL": "weapons.png",
+        "type": "atlas",
+        "key": "WEAPONS"
       }
     ]
   },
@@ -157,6 +158,16 @@
         "type": "tilemapTiledJSON",
         "key": "WORLD_LEVEL",
         "url": "world.json"
+      }
+    ]
+  },
+  {
+    "path": "assets/data",
+    "files": [
+      {
+        "url": "weapon-animations.json",
+        "type": "animation",
+        "key": "WEAPON_ANIMATIONS"
       }
     ]
   }
