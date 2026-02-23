@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Robot Sprite Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #1a1a2e;
+      color: #e0e8f0;
+      padding: 24px;
+    }
+    h1 { color: #4fc3f7; margin-bottom: 8px; }
+    p.desc { color: #8ab4f8; margin-bottom: 24px; font-size: 14px; }
+    .part {
+      background: #0f0f23;
+      border: 1px solid #2a2a4e;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .part h2 { color: #66bb6a; margin-bottom: 12px; font-size: 18px; }
+    .part p { color: #8a8aaa; font-size: 12px; margin-bottom: 12px; }
+    .preview-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .frame-label {
+      font-size: 10px;
+      color: #6a6a8a;
+      text-align: center;
+      margin-top: 4px;
+    }
+    canvas {
+      border: 1px solid #2a2a4e;
+      background: #000;
+      image-rendering: pixelated;
+    }
+    .atlas-canvas {
+      border: 1px solid #4fc3f7;
+      background: transparent;
+    }
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #4fc3f7;
+      background: #0c1a2e;
+      color: #4fc3f7;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: #1a3a5c; }
+    .instructions {
+      margin-top: 32px;
+      padding: 16px;
+      background: #0f0f23;
+      border: 1px solid #2a2a4e;
+      border-radius: 12px;
+    }
+    .instructions h3 { color: #ffb74d; margin-bottom: 8px; }
+    .instructions ol { padding-left: 20px; }
+    .instructions li { margin-bottom: 6px; font-size: 13px; color: #aaa; }
+    code { background: #1a1a3e; padding: 2px 6px; border-radius: 4px; color: #4fc3f7; }
+  </style>
+</head>
+<body>
+  <h1>Robot Sprite Generator</h1>
+  <p class="desc">
+    Generate placeholder robot part sprite sheets. Download the PNG + JSON files,
+    then place them in <code>public/assets/images/robot/</code>.
+    You can later replace these with hand-drawn pixel art in Aseprite.
+  </p>
+
+  <!-- BODY -->
+  <div class="part" id="body-part">
+    <h2>Robot Body</h2>
+    <p>4 frames: idle, move_0, move_1, move_2. Each frame 44x44, atlas 176x44.</p>
+    <div class="preview-row" id="body-previews"></div>
+    <div>
+      <canvas id="body-atlas" class="atlas-canvas"></canvas>
+      <div class="frame-label">Atlas Preview (4x scale)</div>
+    </div>
+    <div class="buttons">
+      <button onclick="downloadPNG('body')">Download robot_body.png</button>
+      <button onclick="downloadJSON('body')">Download robot_body.json</button>
+    </div>
+  </div>
+
+  <!-- ARM -->
+  <div class="part" id="arm-part">
+    <h2>Robot Arm</h2>
+    <p>5 frames at elevation angles: 0, 45, 90, 135, 180. Each frame 30x10, atlas 150x10.</p>
+    <div class="preview-row" id="arm-previews"></div>
+    <div>
+      <canvas id="arm-atlas" class="atlas-canvas"></canvas>
+      <div class="frame-label">Atlas Preview (4x scale)</div>
+    </div>
+    <div class="buttons">
+      <button onclick="downloadPNG('arm')">Download robot_arm.png</button>
+      <button onclick="downloadJSON('arm')">Download robot_arm.json</button>
+    </div>
+  </div>
+
+  <!-- CLAW -->
+  <div class="part" id="claw-part">
+    <h2>Robot Claw</h2>
+    <p>2 frames: open, closed. Each frame 16x16, atlas 32x16.</p>
+    <div class="preview-row" id="claw-previews"></div>
+    <div>
+      <canvas id="claw-atlas" class="atlas-canvas"></canvas>
+      <div class="frame-label">Atlas Preview (4x scale)</div>
+    </div>
+    <div class="buttons">
+      <button onclick="downloadPNG('claw')">Download robot_claw.png</button>
+      <button onclick="downloadJSON('claw')">Download robot_claw.json</button>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h3>How to use</h3>
+    <ol>
+      <li>Click the download buttons for each part (PNG + JSON).</li>
+      <li>Place the files in <code>public/assets/images/robot/</code>.</li>
+      <li>Uncomment the atlas loading lines in <code>src/robot/robot-preload-scene.ts</code>.</li>
+      <li>To customize, open the PNGs in Aseprite or any pixel art editor and redraw
+          the frames -- just keep the same frame sizes.</li>
+    </ol>
+  </div>
+
+  <script>
+    // ─── Colors ──────────────────────────────────────────────────────────────
+    const C = {
+      robot: '#4fc3f7',
+      robotDark: '#0288d1',
+      arm: '#888888',
+      armDark: '#666666',
+      claw: '#cccccc',
+      clawDark: '#999999',
+      white: '#ffffff',
+      black: '#000000',
+    };
+
+    // ─── Drawing helpers ─────────────────────────────────────────────────────
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    // ─── Body frames ─────────────────────────────────────────────────────────
+
+    const BODY_W = 44, BODY_H = 44, BODY_FRAMES = 4;
+
+    function drawBodyFrame(ctx, frameIdx, ox = 0, oy = 0) {
+      // Shadow
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = C.black;
+      roundRect(ctx, ox + 2, oy + 2, BODY_W, BODY_H, 6);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Main body
+      ctx.fillStyle = C.robot;
+      roundRect(ctx, ox, oy, BODY_W, BODY_H, 6);
+      ctx.fill();
+
+      // Inner border
+      ctx.strokeStyle = C.robotDark;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      roundRect(ctx, ox + 3, oy + 3, BODY_W - 6, BODY_H - 6, 4);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Heading arrow (pointing right)
+      ctx.fillStyle = C.white;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(ox + BODY_W - 4, oy + BODY_H / 2);
+      ctx.lineTo(ox + BODY_W - 14, oy + BODY_H / 2 - 7);
+      ctx.lineTo(ox + BODY_W - 14, oy + BODY_H / 2 + 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Center dot
+      ctx.fillStyle = C.black;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(ox + BODY_W / 2, oy + BODY_H / 2, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Tread marks for move frames
+      if (frameIdx > 0) {
+        ctx.strokeStyle = C.black;
+        ctx.globalAlpha = 0.15 + frameIdx * 0.05;
+        ctx.lineWidth = 1;
+        const off = (frameIdx - 1) * 3;
+        [4, BODY_W - 4].forEach(tx => {
+          for (let i = 0; i < 3; i++) {
+            const ty = 8 + off + i * 12;
+            ctx.beginPath();
+            ctx.moveTo(ox + tx, oy + ty);
+            ctx.lineTo(ox + tx, oy + ty + 4);
+            ctx.stroke();
+          }
+        });
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // ─── Arm frames ──────────────────────────────────────────────────────────
+
+    const ARM_W = 30, ARM_H = 10, ARM_ANGLES = [0, 45, 90, 135, 180];
+
+    function drawArmFrame(ctx, angle, ox = 0, oy = 0) {
+      const lenScale = 1 - (angle / 180) * 0.4;
+      const thickness = ARM_H + (angle / 180) * 4;
+      const armLen = ARM_W * lenScale;
+      const yOff = (ARM_H - thickness) / 2;
+
+      // Arm body
+      ctx.fillStyle = C.arm;
+      roundRect(ctx, ox, oy + yOff, armLen, thickness, 2);
+      ctx.fill();
+
+      // Joint
+      ctx.fillStyle = C.armDark;
+      ctx.beginPath();
+      ctx.arc(ox + 3, oy + ARM_H / 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Elevation dot
+      if (angle > 0) {
+        ctx.fillStyle = C.white;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(ox + armLen - 4, oy + ARM_H / 2 - (angle / 180) * 3, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // ─── Claw frames ─────────────────────────────────────────────────────────
+
+    const CLAW_W = 16, CLAW_H = 16;
+
+    function drawClawFrame(ctx, isOpen, ox = 0, oy = 0) {
+      const cx = ox + CLAW_W / 2;
+      const cy = oy + CLAW_H / 2;
+      const spread = isOpen ? 6 : 2;
+
+      ctx.strokeStyle = C.claw;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+
+      // Left jaw
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 4, cy - spread);
+      ctx.lineTo(cx + 7, cy - spread + 2);
+      ctx.stroke();
+
+      // Right jaw
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 4, cy + spread);
+      ctx.lineTo(cx + 7, cy + spread - 2);
+      ctx.stroke();
+
+      // Joint
+      ctx.fillStyle = C.clawDark;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ─── Atlas data ──────────────────────────────────────────────────────────
+
+    const atlasData = {
+      body: {
+        width: BODY_W * BODY_FRAMES,
+        height: BODY_H,
+        frames: [],
+        generate(canvas) {
+          canvas.width = this.width;
+          canvas.height = this.height;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, this.width, this.height);
+          this.frames = [];
+          const names = ['idle', 'move_0', 'move_1', 'move_2'];
+          for (let i = 0; i < BODY_FRAMES; i++) {
+            drawBodyFrame(ctx, i, i * BODY_W, 0);
+            this.frames.push({
+              name: names[i],
+              x: i * BODY_W, y: 0, w: BODY_W, h: BODY_H,
+            });
+          }
+        },
+        json() {
+          const frames = {};
+          this.frames.forEach(f => {
+            frames[f.name] = {
+              frame: { x: f.x, y: f.y, w: f.w, h: f.h },
+              rotated: false,
+              trimmed: false,
+              spriteSourceSize: { x: 0, y: 0, w: f.w, h: f.h },
+              sourceSize: { w: f.w, h: f.h },
+              duration: 100,
+            };
+          });
+          return {
+            frames,
+            meta: {
+              app: 'robot-sprite-generator',
+              version: '1.0',
+              image: 'robot_body.png',
+              format: 'RGBA8888',
+              size: { w: this.width, h: this.height },
+              scale: '1',
+              frameTags: [
+                { name: 'idle', from: 0, to: 0, direction: 'forward' },
+                { name: 'move', from: 1, to: 3, direction: 'forward' },
+              ],
+            },
+          };
+        },
+      },
+      arm: {
+        width: ARM_W * ARM_ANGLES.length,
+        height: ARM_H,
+        frames: [],
+        generate(canvas) {
+          canvas.width = this.width;
+          canvas.height = this.height;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, this.width, this.height);
+          this.frames = [];
+          ARM_ANGLES.forEach((angle, i) => {
+            drawArmFrame(ctx, angle, i * ARM_W, 0);
+            this.frames.push({
+              name: `angle_${angle}`,
+              x: i * ARM_W, y: 0, w: ARM_W, h: ARM_H,
+            });
+          });
+        },
+        json() {
+          const frames = {};
+          this.frames.forEach(f => {
+            frames[f.name] = {
+              frame: { x: f.x, y: f.y, w: f.w, h: f.h },
+              rotated: false,
+              trimmed: false,
+              spriteSourceSize: { x: 0, y: 0, w: f.w, h: f.h },
+              sourceSize: { w: f.w, h: f.h },
+              duration: 100,
+            };
+          });
+          return {
+            frames,
+            meta: {
+              app: 'robot-sprite-generator',
+              version: '1.0',
+              image: 'robot_arm.png',
+              format: 'RGBA8888',
+              size: { w: this.width, h: this.height },
+              scale: '1',
+              frameTags: [
+                { name: 'arm_positions', from: 0, to: ARM_ANGLES.length - 1, direction: 'forward' },
+              ],
+            },
+          };
+        },
+      },
+      claw: {
+        width: CLAW_W * 2,
+        height: CLAW_H,
+        frames: [],
+        generate(canvas) {
+          canvas.width = this.width;
+          canvas.height = this.height;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, this.width, this.height);
+          this.frames = [];
+          drawClawFrame(ctx, true, 0, 0);
+          this.frames.push({ name: 'open', x: 0, y: 0, w: CLAW_W, h: CLAW_H });
+          drawClawFrame(ctx, false, CLAW_W, 0);
+          this.frames.push({ name: 'closed', x: CLAW_W, y: 0, w: CLAW_W, h: CLAW_H });
+        },
+        json() {
+          const frames = {};
+          this.frames.forEach(f => {
+            frames[f.name] = {
+              frame: { x: f.x, y: f.y, w: f.w, h: f.h },
+              rotated: false,
+              trimmed: false,
+              spriteSourceSize: { x: 0, y: 0, w: f.w, h: f.h },
+              sourceSize: { w: f.w, h: f.h },
+              duration: 100,
+            };
+          });
+          return {
+            frames,
+            meta: {
+              app: 'robot-sprite-generator',
+              version: '1.0',
+              image: 'robot_claw.png',
+              format: 'RGBA8888',
+              size: { w: this.width, h: this.height },
+              scale: '1',
+              frameTags: [
+                { name: 'open', from: 0, to: 0, direction: 'forward' },
+                { name: 'closed', from: 1, to: 1, direction: 'forward' },
+              ],
+            },
+          };
+        },
+      },
+    };
+
+    // ─── Render all previews ─────────────────────────────────────────────────
+
+    function renderAll() {
+      // Body previews
+      const bodyRow = document.getElementById('body-previews');
+      bodyRow.innerHTML = '';
+      const bodyNames = ['Idle', 'Move 0', 'Move 1', 'Move 2'];
+      for (let i = 0; i < BODY_FRAMES; i++) {
+        const wrap = document.createElement('div');
+        const c = document.createElement('canvas');
+        c.width = BODY_W;
+        c.height = BODY_H;
+        c.style.width = (BODY_W * 3) + 'px';
+        c.style.height = (BODY_H * 3) + 'px';
+        drawBodyFrame(c.getContext('2d'), i);
+        wrap.appendChild(c);
+        const lbl = document.createElement('div');
+        lbl.className = 'frame-label';
+        lbl.textContent = bodyNames[i];
+        wrap.appendChild(lbl);
+        bodyRow.appendChild(wrap);
+      }
+
+      // Body atlas
+      const bodyAtlas = document.getElementById('body-atlas');
+      atlasData.body.generate(bodyAtlas);
+      bodyAtlas.style.width = (atlasData.body.width * 4) + 'px';
+      bodyAtlas.style.height = (atlasData.body.height * 4) + 'px';
+
+      // Arm previews
+      const armRow = document.getElementById('arm-previews');
+      armRow.innerHTML = '';
+      ARM_ANGLES.forEach((angle, i) => {
+        const wrap = document.createElement('div');
+        const c = document.createElement('canvas');
+        c.width = ARM_W;
+        c.height = ARM_H;
+        c.style.width = (ARM_W * 3) + 'px';
+        c.style.height = (ARM_H * 3) + 'px';
+        drawArmFrame(c.getContext('2d'), angle);
+        wrap.appendChild(c);
+        const lbl = document.createElement('div');
+        lbl.className = 'frame-label';
+        lbl.textContent = angle + '\u00b0';
+        wrap.appendChild(lbl);
+        armRow.appendChild(wrap);
+      });
+
+      // Arm atlas
+      const armAtlas = document.getElementById('arm-atlas');
+      atlasData.arm.generate(armAtlas);
+      armAtlas.style.width = (atlasData.arm.width * 4) + 'px';
+      armAtlas.style.height = (atlasData.arm.height * 4) + 'px';
+
+      // Claw previews
+      const clawRow = document.getElementById('claw-previews');
+      clawRow.innerHTML = '';
+      [true, false].forEach(isOpen => {
+        const wrap = document.createElement('div');
+        const c = document.createElement('canvas');
+        c.width = CLAW_W;
+        c.height = CLAW_H;
+        c.style.width = (CLAW_W * 3) + 'px';
+        c.style.height = (CLAW_H * 3) + 'px';
+        drawClawFrame(c.getContext('2d'), isOpen);
+        wrap.appendChild(c);
+        const lbl = document.createElement('div');
+        lbl.className = 'frame-label';
+        lbl.textContent = isOpen ? 'Open' : 'Closed';
+        wrap.appendChild(lbl);
+        clawRow.appendChild(wrap);
+      });
+
+      // Claw atlas
+      const clawAtlas = document.getElementById('claw-atlas');
+      atlasData.claw.generate(clawAtlas);
+      clawAtlas.style.width = (atlasData.claw.width * 4) + 'px';
+      clawAtlas.style.height = (atlasData.claw.height * 4) + 'px';
+    }
+
+    // ─── Download helpers ────────────────────────────────────────────────────
+
+    function downloadPNG(part) {
+      const canvas = document.getElementById(part + '-atlas');
+      const link = document.createElement('a');
+      link.download = 'robot_' + part + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function downloadJSON(part) {
+      const data = atlasData[part].json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.download = 'robot_' + part + '.json';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────
+    renderAll();
+  </script>
+</body>
+</html>

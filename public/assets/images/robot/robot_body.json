@@ -1,0 +1,113 @@
+{
+  "frames": {
+    "idle": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 44
+      },
+      "duration": 100
+    },
+    "move_0": {
+      "frame": {
+        "x": 44,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 44
+      },
+      "duration": 100
+    },
+    "move_1": {
+      "frame": {
+        "x": 88,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 44
+      },
+      "duration": 100
+    },
+    "move_2": {
+      "frame": {
+        "x": 132,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 44
+      },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "app": "robot-sprite-generator",
+    "version": "1.0",
+    "image": "robot_body.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 176,
+      "h": 44
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "idle",
+        "from": 0,
+        "to": 0,
+        "direction": "forward"
+      },
+      {
+        "name": "move",
+        "from": 1,
+        "to": 3,
+        "direction": "forward"
+      }
+    ]
+  }
+}

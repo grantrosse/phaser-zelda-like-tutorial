@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robot Simulation</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        background: #060d1a;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: #e0e8f0;
+      }
+      * { box-sizing: border-box; }
+
+      /* ── Layout ─────────────────────────────────────────────────── */
+      #app {
+        display: flex;
+        height: 100vh;
+      }
+      #sidebar {
+        width: 200px;
+        min-width: 200px;
+        background: #0a1020;
+        border-right: 1px solid #1a2a3a;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+      #main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      /* ── Header ─────────────────────────────────────────────────── */
+      .header-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        color: #4fc3f7;
+      }
+
+      /* ── Mode toggle ───────────────────────────────────────────── */
+      .mode-toggle {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #1a3a5c;
+      }
+      .mode-toggle button {
+        border: none;
+        border-radius: 0;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        background: #0c1a2e;
+        color: #6a8aaa;
+        font-family: inherit;
+      }
+      .mode-toggle button.active {
+        background: #1a3a5c;
+        color: #4fc3f7;
+      }
+      .mode-toggle button:hover { color: #8ab4f8; }
+
+      /* ── Controls bar ───────────────────────────────────────────── */
+      #controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      select, button.ctrl-btn {
+        padding: 5px 12px;
+        border-radius: 8px;
+        border: 1px solid #1a3a5c;
+        background: #0c1a2e;
+        color: #8ab4f8;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      button.ctrl-btn:hover {
+        border-color: #4fc3f7;
+        color: #4fc3f7;
+      }
+      #status {
+        font-size: 11px;
+        color: #3a5a7a;
+      }
+
+      /* ── Game container ──────────────────────────────────────────── */
+      #game-container {
+        border: 2px solid #1a3a5c;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      /* ── Sidebar sections ────────────────────────────────────────── */
+      .sb-section {
+        padding: 10px 12px;
+        border-bottom: 1px solid #1a2a3a;
+      }
+      .sb-section h3 {
+        margin: 0 0 8px 0;
+        font-size: 11px;
+        color: #4a6a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* ── Palette buttons ──────────────────────────────────────────── */
+      .palette {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+      }
+      .palette button {
+        padding: 6px 4px;
+        border-radius: 6px;
+        border: 1px solid #1a2a3a;
+        background: #0c1628;
+        color: #8ab4f8;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-family: inherit;
+      }
+      .palette button:hover {
+        border-color: #4fc3f7;
+        color: #4fc3f7;
+      }
+      .palette button.selected {
+        border-color: #ffee58;
+        color: #ffee58;
+        background: #1a2a1a;
+      }
+      .color-swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+
+      /* ── Tool buttons ─────────────────────────────────────────────── */
+      .tool-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .tool-buttons button {
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: 1px solid #1a2a3a;
+        background: #0c1628;
+        color: #8ab4f8;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .tool-buttons button:hover {
+        border-color: #4fc3f7;
+        color: #4fc3f7;
+      }
+      .tool-buttons button.active {
+        border-color: #ef5350;
+        color: #ef5350;
+      }
+
+      /* ── Save/load buttons ────────────────────────────────────────── */
+      .save-load {
+        display: flex;
+        gap: 4px;
+      }
+      .save-load button {
+        flex: 1;
+        padding: 5px 6px;
+        border-radius: 6px;
+        border: 1px solid #1a2a3a;
+        background: #0c1628;
+        color: #8ab4f8;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .save-load button:hover {
+        border-color: #66bb6a;
+        color: #66bb6a;
+      }
+
+      /* ── Grid size input ───────────────────────────────────────────── */
+      .grid-size-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .grid-size-row label {
+        font-size: 10px;
+        color: #4a6a8a;
+      }
+      .grid-size-row input {
+        width: 50px;
+        padding: 3px 6px;
+        border-radius: 4px;
+        border: 1px solid #1a2a3a;
+        background: #0c1628;
+        color: #8ab4f8;
+        font-size: 11px;
+        font-family: inherit;
+      }
+      .grid-size-row span {
+        font-size: 10px;
+        color: #4a6a8a;
+      }
+
+      /* ── Hide sections based on mode ──────────────────────────────── */
+      #sidebar.play-mode .edit-only { display: none; }
+      #sidebar.edit-mode .play-only { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- ── Sidebar ──────────────────────────────────────────────── -->
+      <div id="sidebar" class="edit-mode">
+        <div class="sb-section">
+          <h3>Mode</h3>
+          <div class="mode-toggle">
+            <button id="btn-mode-edit" class="active" title="Build world">✏ Edit</button>
+            <button id="btn-mode-play" title="Run programs">▶ Play</button>
+          </div>
+        </div>
+
+        <!-- EDIT-ONLY sections -->
+        <div class="sb-section edit-only">
+          <h3>Obstacles</h3>
+          <div class="palette" id="obstacle-palette">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <div class="sb-section edit-only">
+          <h3>Tools</h3>
+          <div class="tool-buttons">
+            <button id="btn-pointer" title="Select / Move">🔲 Pointer</button>
+            <button id="btn-delete" title="Delete mode">🗑 Delete</button>
+            <button id="btn-clear-all" title="Clear all obstacles">⚠ Clear</button>
+          </div>
+        </div>
+
+        <div class="sb-section edit-only">
+          <h3>Grid</h3>
+          <div class="grid-size-row">
+            <label>Size</label>
+            <input id="grid-size" type="number" value="400" step="100" min="200" max="1200" />
+            <span>px</span>
+          </div>
+        </div>
+
+        <div class="sb-section edit-only">
+          <h3>World</h3>
+          <div class="save-load">
+            <button id="btn-save">💾 Save</button>
+            <button id="btn-load">📂 Load</button>
+            <button id="btn-export-json">📋 Copy</button>
+          </div>
+        </div>
+
+        <!-- PLAY-ONLY sections -->
+        <div class="sb-section play-only">
+          <h3>Program</h3>
+          <select id="demo-select">
+            <option value="square">Square (90°)</option>
+            <option value="corridor">Tight Corridor</option>
+            <option value="lift">Lift &amp; Carry</option>
+            <option value="grab">Grab &amp; Turn</option>
+            <option value="push">Push Maze</option>
+            <option value="angle">Angle Test</option>
+            <option value="action">Action Show</option>
+          </select>
+        </div>
+
+        <div class="sb-section play-only">
+          <h3>Playback</h3>
+          <div class="tool-buttons">
+            <button id="btn-run" class="ctrl-btn">▶ Run</button>
+            <button id="btn-reset" class="ctrl-btn">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Main area ────────────────────────────────────────────── -->
+      <div id="main">
+        <div class="header-row">
+          <h1>🤖 Robot Simulation</h1>
+          <span id="status">Ready</span>
+        </div>
+        <div id="game-container"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/robot-demo.ts"></script>
+  </body>
+</html>
